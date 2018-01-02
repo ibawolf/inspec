@@ -97,7 +97,15 @@ module Inspec
     def run(with = nil)
       Inspec::Log.debug "Starting run with targets: #{@target_profiles.map(&:to_s)}"
       load
-      run_data = run_tests(with)
+      status, run_data = run_tests(with)
+      render_output(run_data)
+      status
+    end
+
+    def render_output(run_data)
+      @conf[:reporter].each do |k, v|
+        Inspec::Reporters.render(k, v, run_data)
+      end
     end
 
     def write_lockfile(profile)

@@ -58,7 +58,9 @@ module Inspec
       option :controls, type: :array,
         desc: 'A list of controls to run. Ignore all other tests.'
       option :format, type: :string,
-        desc: 'Which formatter to use: cli, progress, documentation, json, json-min, junit'
+        desc: '[DEPRECATED] Please use --format - this will be removed in InSpec 2.0'
+      option :reporter, type: :array,
+        desc: 'Which reporter(s) to use: cli, json, json-min, json-rspec, junit'
       option :color, type: :boolean,
         desc: 'Use colors in output.'
       option :attrs, type: :array,
@@ -71,6 +73,8 @@ module Inspec
         desc: 'Write out a lockfile based on this execution (unless one already exists)'
       option :backend_cache, type: :boolean,
         desc: 'Allow caching for backend command output.'
+      option :show_progress, type: :boolean,
+        desc: 'Show progress while executing tests.'
     end
 
     def self.default_options
@@ -141,7 +145,36 @@ module Inspec
 
       # merge in any options defined via thor
       opts.merge!(options)
+
+      # clean up reports
+      clean_reporters(opts) if type == :exec
+
       Thor::CoreExt::HashWithIndifferentAccess.new(opts)
+    end
+
+    def clean_reporters(opts)
+      # copy over any of the old syntex --format
+      # until its remove in 2.0
+      if !opts['format'].nil?
+        opts['reporter'] = []
+        opts['reporter'] << opts['format']
+        opts.delete('format')
+      elsif opts['reporter'].nil?
+        # add this to exec defaults when this is removed
+        opts['reporter'] = ['cli']
+      end
+
+      reports = {}
+      stdout = 0
+      opts['reporter'].each do |report|
+        k, v = report.split(':')
+        reports[k] = v
+        stdout += 1 if v.nil? || v == '-'
+      end
+
+      raise ArgumentError, 'The option --reporter can only have a single report outputting to stdout.' if stdout > 1
+
+      opts['reporter'] = reports
     end
 
     def options_json

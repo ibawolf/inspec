@@ -156,7 +156,6 @@ class Inspec::InspecCLI < Inspec::BaseCLI
     o = opts(:exec).dup
     configure_logger(o)
 
-    # check for deprecated --cache
     # TODO: REMOVE for inspec 2.0
     if o.key?('cache')
       o[:vendor_cache] = o[:cache]
@@ -198,6 +197,7 @@ class Inspec::InspecCLI < Inspec::BaseCLI
   def shell_func
     diagnose
     o = opts.dup
+    binding.pry
     o[:debug_shell] = true
 
     json_output = ['json', 'json-min'].include?(opts['format'])

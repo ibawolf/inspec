@@ -73,8 +73,8 @@ module Inspec
     # @return [int] 0 if all went well; otherwise nonzero
     def run(with = nil)
       with ||= RSpec::Core::Runner.new(nil)
-      with.run_specs(tests)
-      require 'pry'; binding.pry
+      status = with.run_specs(tests)
+      [status, @formatter.run_data]
     end
 
     # Provide an output hash of the run's report
@@ -98,13 +98,30 @@ module Inspec
 
     private
 
-    FORMATTERS = {
-      'json-min' => 'Inspec::Formatters::JsonMin',
-      'json' => 'Inspec::Formatters::Json',
-      'json-rspec' => 'Inspec::Formatters::RspecJson',
-      'cli' => 'Inspec::Formatters::CLI',
-      'junit' => 'Inspec::Formatters::Junit',
-    }.freeze
+    # Set optional formatters and output
+    #
+    #
+    def set_optional_formatters
+      return if @conf[:reporter].nil?
+      if @conf[:reporter].key?('json-rspec')
+        if @conf[:reporter]['json-rspec'].nil?
+          RSpec.configuration.add_formatter(Inspec::Formatters::RspecJson)
+        else
+          RSpec.configuration.add_formatter(Inspec::Formatters::RspecJson, @conf[:reporter]['json-rspec'])
+        end
+        @conf[:reporter].delete('json-rspec')
+      end
+
+      formats = @conf[:reporter].select { |k, _v| %w{documentation progress}.include?(k) }
+      formats.each do |k, v|
+        if v.nil?
+          RSpec.configuration.add_formatter(k.to_sym)
+        else
+          RSpec.configuration.add_formatter(k.to_sym, v)
+        end
+        @conf[:reporter].delete(k)
+      end
+    end
 
     # Configure the output formatter and stream to be used with RSpec.
     #
@@ -116,10 +133,10 @@ module Inspec
         RSpec.configuration.output_stream = @conf['output']
       end
 
-      format = FORMATTERS[@conf['format']] || @conf['format'] || FORMATTERS['cli']
-      @formatter = RSpec.configuration.add_formatter(format)
+      @formatter = RSpec.configuration.add_formatter(Inspec::Formatters::Base)
+      RSpec.configuration.add_formatter(Inspec::Formatters::ShowProgress) if @conf[:show_progress]
+      set_optional_formatters
       RSpec.configuration.color = @conf['color']
-
       setup_reporting if @conf['report']
     end
 

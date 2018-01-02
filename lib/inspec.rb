@@ -14,6 +14,7 @@ require 'matchers/matchers'
 require 'inspec/runner'
 require 'inspec/shell'
 require 'inspec/formatters'
+require 'inspec/reporters'
 
 # all utils that may be required by plugins
 require 'inspec/base_cli'

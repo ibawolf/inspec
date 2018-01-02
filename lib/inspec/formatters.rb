@@ -1,6 +1,3 @@
 require 'inspec/formatters/base'
-require 'inspec/formatters/cli'
-require 'inspec/formatters/json'
-require 'inspec/formatters/json_min'
 require 'inspec/formatters/json_rspec'
-require 'inspec/formatters/junit'
+require 'inspec/formatters/show_progress'
