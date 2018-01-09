@@ -1,6 +1,9 @@
 ---
 driver:
-  name: vagrant
+  #name: vagrant
+  name: docker
+  binary: docker
+  use_sudo: false
 
 provisioner:
   name: puppet_apply
