@@ -7,6 +7,7 @@ coverage
 Berksfile.lock
 .bundle
 .librarian
+**/*.sw?
 Puppetfile.lock
 .kitchen.local.yml
 profile.tar.gz

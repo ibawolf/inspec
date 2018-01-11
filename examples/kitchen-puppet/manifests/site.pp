@@ -5,20 +5,20 @@
 case $osfamily {
   'RedHat': {
     yumrepo { 'nginx':
-      descr => 'Nginx Repo',
+      descr   => 'Nginx Repo',
       baseurl => 'http://nginx.org/packages/centos/7/x86_64',
-      gpgkey => 'http://nginx.org/keys/nginx_signing.key',
-      enabled => 1
+      gpgkey  => 'http://nginx.org/keys/nginx_signing.key',
+      enabled => 1,
     }
 
     package { 'nginx':
+      ensure  => 'latest'
       require => [Yumrepo[nginx]],
-      ensure => 'latest'
     }
   }
   'Debian': {
     package { 'nginx':
-      ensure => 'latest'
+      ensure => 'latest',
     }
   }
   default: {
@@ -28,6 +28,6 @@ case $osfamily {
 
 # Start the service
 service { 'nginx':
-  enable => 'true',
-  ensure => 'running'
+  ensure => 'running',
+  enable => true,
 }
